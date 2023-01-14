@@ -1,3 +1,16 @@
+*.Rproj
+*.DS_Store
+
+# In any of the rounds, ignore the data
+source_data/*/*
+
+# Ignore all files in clean data
+clean_data/*
+
+# Ignore the output 
+output/*
+output/*/*
+
 # History files
 .Rhistory
 .Rapp.history

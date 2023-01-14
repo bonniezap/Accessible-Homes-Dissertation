@@ -54,7 +54,7 @@ tabled = function (..., useNA = 'ifany') base::table(..., useNA = useNA)
 ####################ROUND 1######################################################
 #################################################################################
 
-round1 <- (read_sas("Documents/NHATS/NHATS Public Data/Public Round 1/NHATS_R1_Final_Release_SAS_V3/NHATS_Round_1_SP_File.sas7bdat", NULL)) %>% 
+round1 <- (read_sas("source_data/round1/NHATS_Round_1_SP_File.sas7bdat", NULL)) %>% 
     select(spid 
            ,r1d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
               # Age groupings:  1 - 65-69
@@ -359,8 +359,10 @@ press2011=case_when(
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid', 'female', 'count', 'round', 'age_grp','whitenothisp', 'blacknothisp', 'hispanic', 'otherrace', 'falls2011', 'competence2011', 'frailty2011', 'pfp2011', 'press2011', 'accburden2011', 'recentstructmod2011')
 r1<-round1[vars]
-write.csv (r1,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/forheatmap.csv")
-tabled(r1$frailty2011, r1$press2011, r1$falls2011)
+write.csv (r1,"clean_data/forheatmap.csv")
+a<-tabled(r1$frailty2011, r1$press2011, r1$falls2011)
+View (a)
+write.csv (a,"output/rawfrailtytable.csv")
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
 r1same<-r1 %>% rename(
