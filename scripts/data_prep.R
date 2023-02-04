@@ -6,9 +6,19 @@
 #To complete the project, full dependent, independent, moderator, and covariate variables need to be constructed and transformed before being analyzed in a weighted model.
 ###########################################
 #Next tasks:
+#2/4/23 Crosswalking task steps:
+#1. Identify all variables needed for INDEPendent, DEPendent, first round of COVariates, and WEIGHTING
+#2. Make spreadsheet of them in excel with columns for each round
+#3. Document crosswalk of each variable across each wave
+#4. Then read data collection notes for each round and make notes about any of my variables that were effected in each round
+#5. As new covariates are used, go through this process for each new variable
+
+#2/4/23 Get official permission from NHATS to use birth year and other sensitive data in dissertation. Ask Jeff on Tuesday about it
+#Find people with NO RACE And see if I can fill it in from sensitive data.
+
 #do health, wealth, dementia, and home caregivers altogether across rounds.  
 #add time invarying characteristics: genderOK raceOK, education (emailed Changmin 1/8, I can't find it.)
-#add time varying characteristics: age_groupOK, wealth, health status, dementia status (once =yes, make following dementia status =yes), anyone else living in home? Is this alternate explanation?
+#add time varying characteristics: birthyrOK, wealth, health status, dementia status (once =yes, make following dementia status =yes), anyone else living in home? Is this alternate explanation?
 #check crosswalk of all my vars across rounds in NHATS to see if changes in definition or other changes
 #read all readme files for all rounds of NHATS to make sure there are no weird situations in the data
 
@@ -19,16 +29,10 @@
 #Can use falls outcome var, as well as accessible housing in 2020, so frailty isn't necessary as causal predictor
 #look at missing values in falls variable
 #work with NAs in construct of accessibility burden inventory ##1404 inapplicable in fl1onefloor, so this makes it difficult to calculate. Look into this.  - looked at this, use raw vars not fl1floor flag because it isn't in all rounds. 
-#check bathroom amenities - does everyone have them? - yes, don't use.
-#Add variable names for accburden to .docx
-
-#What do I want to show for demographics table? 
-#What are control variables?
+#check bathroom amenities - does everyone have them? - yes, don't use, no variation in dataset so no analysis possible
 #Once all necessary variables are coded up then I can compare my sample against the whole dataset, and then run listwise deletion
 #Run 3 crosstabs 2x2. Look at distribution of cases and percentages. - Frailty by acc, acc by falls, falls by frailty
 #continuous CFS could be a sensitivity analysis, or could be necessary as "x axis" in multilevel modeling.
-
-#kingsley-davis - chi square publications - simple statistical tools
 
 #Decisions:
 #This analysis looks at people's frailty and home accessibility levels in 2011 and their falls in the last year in 2012. 
@@ -53,16 +57,33 @@ tabled = function (..., useNA = 'ifany') base::table(..., useNA = useNA)
 #################################################################################
 ####################ROUND 1######################################################
 #################################################################################
+##Get permanent demogs from sensitive data file, round 1 and merge to round 1 public data
+#Get race of people who chose other and have data for major other vars
+a<-read_sas("~/Documents/NHATS/NHATS Sensitive Data/Sensitive Round 1/NHATS_Round_1_SP_Sen_Dem_Files_SAS/NHATS_Round_1_SP_Sen_Dem_File.sas7bdat", NULL) %>% 
+filter (spid %in% c('10000516',
+'10001716'
+,'10003601'
+,'10003732'
+,'10004210'
+,'10004384'
+,'10004390'
+,'10006535'
+,'10006951'
+,'10007002'
+,'10008411'
+,'10008788'
+,'10009949'
+,'10011381'
+,'10011684'
+,'10012303'))
+##CONFIRMED THAT ALL OF THESE PEOPLE REFUSED RACE QUESTION, but they do have frailty and accessibility data. "16 people were not included because they refused to answer race demographic question"
+#NO RACE indicated except indicated that they are “NOT HISPANIC”: 10004384, 10004390, 10008411, 10009949, 10012303
 
-round1 <- (read_sas("source_data/round1/NHATS_Round_1_SP_File.sas7bdat", NULL)) %>% 
+round1 <- 
+  merge (read_sas("~/Documents/NHATS/NHATS Sensitive Data/Sensitive Round 1/NHATS_Round_1_SP_Sen_Dem_Files_SAS/NHATS_Round_1_SP_Sen_Dem_File.sas7bdat", NULL) %>% 
+  select(spid,r1dbirthyr) %>% mutate(birthyr=r1dbirthyr),
+(read_sas("source_data/round1/NHATS_Round_1_SP_File.sas7bdat", NULL)) %>% 
     select(spid 
-           ,r1d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-              # Age groupings:  1 - 65-69
-              #                 2 - 70-74
-              #                 3 - 75-79
-              #                 4 - 80-84
-              #                 5 - 85-89
-              #                 6 - 90 +
 #Do Health, Dementia, in-home care, and wealth altogether for each round to make process more efficient. 
            ,hc1health #overall health
               #1 EXCELLENT
@@ -157,10 +178,7 @@ round1 <- (read_sas("source_data/round1/NHATS_Round_1_SP_File.sas7bdat", NULL)) 
   #make round year
   round='2011',
   
-  #prepare time-varying demogs for each round
-  age_grp=r1d2intvrage,
-  
-      #This next section preps variables needed for one or more of the 5 frailty metrics  
+    #This next section preps variables needed for one or more of the 5 frailty metrics  
       hw1howtallin = replace_na(hw1howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
       height2011=hw1howtallft*12+hw1howtallin, #height is needed to calculate BMI and for walking test 
       bmi2011=703*(hw1currweigh/(height2011)^2), #this builds BMI, which is used to create PFP elements grip and shrinking
@@ -355,9 +373,10 @@ press2011=case_when(
       pfp2011==6 ~1
     )
     ) #%>% filter (pfp2011>=1) #must have PFP score
+) #ends merge
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid', 'female', 'count', 'round', 'age_grp','whitenothisp', 'blacknothisp', 'hispanic', 'otherrace', 'falls2011', 'competence2011', 'frailty2011', 'pfp2011', 'press2011', 'accburden2011', 'recentstructmod2011')
+vars = c('spid', 'female', 'count', 'round', 'birthyr','whitenothisp', 'blacknothisp', 'hispanic', 'otherrace', 'falls2011', 'competence2011', 'frailty2011', 'pfp2011', 'press2011', 'accburden2011', 'recentstructmod2011')
 r1<-round1[vars]
 write.csv (r1,"clean_data/forheatmap.csv")
 a<-tabled(r1$frailty2011, r1$press2011, r1$falls2011)
@@ -375,7 +394,7 @@ r1same<-r1 %>% rename(
   select(spid
          ,round
          ,count
-         ,age_grp
+         ,birthyr
          ,falls
          ,pfp
          ,competence
@@ -436,6 +455,7 @@ r1same<-r1 %>% rename(
 # prop.table(svytable(~pfp2011+r1dgender,nhats.dsgn),2)
 # prop.table(svytable(~frail2011+r1dgender,nhats.dsgn),2)
 
+
 #################################################################################
 ####################ROUND 2######################################################
 #################################################################################
@@ -447,13 +467,6 @@ round2 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #  read_sas("Documents/NHATS/NHATS Public Data/Public Round 2/NHATS_R2_Final_Release_SAS_V3/NHATS_Round_2_SP_File_v2.sas7bdat", NULL) %>% 
   select(spid
          ,female
-         ,r2d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa2dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr2dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw2currweigh #current weight in pounds
@@ -501,9 +514,7 @@ round2 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   na_if (-7) %>% 
   na_if (-1) %>% 
   mutate(
-    #prepare time-varying demogs for each round
-    age_grp=r2d2intvrage,
-    
+
     count=1,
     round='2012',
     #This next section preps variables needed for one or more of the 5 frailty metrics  
@@ -704,7 +715,7 @@ round2 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
     #%>% filter (pfp2012>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid', 'count', 'round', 'age_grp', 'falls2012', 'competence2012', 'frailty2012', 'pfp2012', 'press2012', 'accburden2012','recentstructmod2012')
+vars = c('spid', 'count', 'round', 'falls2012', 'competence2012', 'frailty2012', 'pfp2012', 'press2012', 'accburden2012','recentstructmod2012')
 r2<-round2[vars]
 write.csv (r2,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r2.csv")
 
@@ -720,7 +731,6 @@ r2same<-r2 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -738,13 +748,6 @@ write.csv (rounds12,"~/Google Drive/000Albright Dissertation Progress/Dissertati
 round3 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 3/NHATS_R3_Final_Release_SAS_V2/NHATS_Round_3_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r3d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa3dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr3dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw3currweigh #current weight in pounds
@@ -793,9 +796,7 @@ round3 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   na_if (-1) %>% 
   mutate(
     count=1,
-    #prepare time-varying demogs for each round
-    age_grp=r3d2intvrage,
-    
+
     round='2013',
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw3howtallin = replace_na(hw3howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
@@ -996,7 +997,7 @@ round3 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2013', 'competence2013', 'frailty2013', 'pfp2013', 'press2013', 'accburden2013','recentstructmod2013', 'hc3worryfall')
+vars = c('spid','count', 'round', 'falls2013', 'competence2013', 'frailty2013', 'pfp2013', 'press2013', 'accburden2013','recentstructmod2013', 'hc3worryfall')
 r3<-round3[vars]
 write.csv (r3,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r3.csv")
 
@@ -1012,7 +1013,6 @@ r3same<-r3 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -1030,13 +1030,6 @@ write.csv (rounds123,"~/Google Drive/000Albright Dissertation Progress/Dissertat
 round4 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 4/NHATS_R4_Final_Release_SAS_V2/NHATS_Round_4_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r4d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa4dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr4dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw4currweigh #current weight in pounds
@@ -1080,9 +1073,7 @@ round4 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   mutate(
     count=1,
     round='2014',
-    #prepare time-varying demogs for each round
-    age_grp=r4d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw4howtallin = replace_na(hw4howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2014=hw4howtallft*12+hw4howtallin, #height is needed to calculate BMI and for walking test 
@@ -1282,7 +1273,7 @@ round4 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2014>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2014', 'competence2014', 'frailty2014', 'pfp2014', 'press2014', 'accburden2014','recentstructmod2014', 'hc4worryfall')
+vars = c('spid','count', 'round', 'falls2014', 'competence2014', 'frailty2014', 'pfp2014', 'press2014', 'accburden2014','recentstructmod2014', 'hc4worryfall')
 r4<-round4[vars]
 write.csv (r4,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r4.csv")
 
@@ -1298,7 +1289,6 @@ r4same<-r4 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -1317,13 +1307,6 @@ write.csv (rounds1234,"~/Google Drive/000Albright Dissertation Progress/Disserta
 round5 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 5/NHATS_R5_Final_Release_SAS_V3/NHATS_Round_5_SP_File_v2.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r5d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa5dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr5dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw5currweigh #current weight in pounds
@@ -1367,9 +1350,7 @@ round5 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   mutate(
     count=1,
     round='2015',
-    #prepare time-varying demogs for each round
-    age_grp=r5d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw5howtallin = replace_na(hw5howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2015=hw5howtallft*12+hw5howtallin, #height is needed to calculate BMI and for walking test 
@@ -1569,7 +1550,7 @@ round5 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2015', 'competence2015', 'frailty2015', 'pfp2015', 'press2015', 'accburden2015','recentstructmod2015', 'hc5worryfall')
+vars = c('spid','count', 'round', 'falls2015', 'competence2015', 'frailty2015', 'pfp2015', 'press2015', 'accburden2015','recentstructmod2015', 'hc5worryfall')
 r5<-round5[vars]
 write.csv (r5,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r5.csv")
 
@@ -1585,7 +1566,6 @@ r5same<-r5 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -1603,13 +1583,6 @@ write.csv (rounds12345,"~/Google Drive/000Albright Dissertation Progress/Dissert
 round6 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 6/NHATS_R6_Final_Release_SAS_V3/NHATS_Round_6_SP_File_V2.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r6d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa6dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr6dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw6currweigh #current weight in pounds
@@ -1658,9 +1631,7 @@ round6 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   mutate(
     count=1,
     round='2016',
-    #prepare time-varying demogs for each round
-    age_grp=r6d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw6howtallin = replace_na(hw6howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2016=hw6howtallft*12+hw6howtallin, #height is needed to calculate BMI and for walking test 
@@ -1859,7 +1830,7 @@ round6 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2016', 'competence2016', 'frailty2016', 'pfp2016', 'press2016', 'accburden2016','recentstructmod2016', 'hc6worryfall')
+vars = c('spid','count', 'round', 'falls2016', 'competence2016', 'frailty2016', 'pfp2016', 'press2016', 'accburden2016','recentstructmod2016', 'hc6worryfall')
 r6<-round6[vars]
 write.csv (r6,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r6.csv")
 
@@ -1875,7 +1846,6 @@ r6same<-r6 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -1893,13 +1863,6 @@ write.csv (rounds123456,"~/Google Drive/000Albright Dissertation Progress/Disser
 round7 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 7/NHATS_R7_Final_Release_SAS_V2/NHATS_Round_7_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r7d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa7dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr7dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw7currweigh #current weight in pounds
@@ -1948,9 +1911,7 @@ round7 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   mutate(
     count=1,
     round='2017',
-    #prepare time-varying demogs for each round
-    age_grp=r7d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw7howtallin = replace_na(hw7howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2017=hw7howtallft*12+hw7howtallin, #height is needed to calculate BMI and for walking test 
@@ -2149,7 +2110,7 @@ round7 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2017', 'competence2017', 'frailty2017', 'pfp2017', 'press2017', 'accburden2017','recentstructmod2017', 'hc7worryfall')
+vars = c('spid','count', 'round', 'falls2017', 'competence2017', 'frailty2017', 'pfp2017', 'press2017', 'accburden2017','recentstructmod2017', 'hc7worryfall')
 r7<-round7[vars]
 write.csv (r7,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r7.csv")
 
@@ -2165,7 +2126,6 @@ r7same<-r7 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -2183,13 +2143,6 @@ write.csv (rounds1234567,"~/Google Drive/000Albright Dissertation Progress/Disse
 round8 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 8/NHATS_R8_Final_Release_SAS_V2/NHATS_Round_8_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r8d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa8dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr8dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw8currweigh #current weight in pounds
@@ -2238,9 +2191,7 @@ round8 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   mutate(
     count=1,
     round='2018',
-    #prepare time-varying demogs for each round
-    age_grp=r8d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw8howtallin = replace_na(hw8howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2018=hw8howtallft*12+hw8howtallin, #height is needed to calculate BMI and for walking test 
@@ -2439,7 +2390,7 @@ round8 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2018', 'competence2018', 'frailty2018', 'pfp2018', 'press2018', 'accburden2018','recentstructmod2018', 'hc8worryfall')
+vars = c('spid','count', 'round', 'falls2018', 'competence2018', 'frailty2018', 'pfp2018', 'press2018', 'accburden2018','recentstructmod2018', 'hc8worryfall')
 r8<-round8[vars]
 write.csv (r8,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r8.csv")
 
@@ -2455,7 +2406,6 @@ r8same<-r8 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -2474,13 +2424,6 @@ write.csv (rounds12345678,"~/Google Drive/000Albright Dissertation Progress/Diss
 round9 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 9/NHATS_R9_Final_Release_SAS/NHATS_Round_9_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r9d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
          ,wa9dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
          ,gr9dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
          ,hw9currweigh #current weight in pounds
@@ -2529,9 +2472,7 @@ round9 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   mutate(
     count=1,
     round='2019',
-    #prepare time-varying demogs for each round
-    age_grp=r9d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw9howtallin = replace_na(hw9howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2019=hw9howtallft*12+hw9howtallin, #height is needed to calculate BMI and for walking test 
@@ -2730,7 +2671,7 @@ round9 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2019', 'competence2019', 'frailty2019', 'pfp2019', 'press2019', 'accburden2019','recentstructmod2019', 'hc9worryfall')
+vars = c('spid','count', 'round', 'falls2019', 'competence2019', 'frailty2019', 'pfp2019', 'press2019', 'accburden2019','recentstructmod2019', 'hc9worryfall')
 r9<-round9[vars]
 write.csv (r9,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r9.csv")
 
@@ -2746,7 +2687,6 @@ r9same<-r9 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp
          ,competence
@@ -2764,13 +2704,6 @@ write.csv (rounds123456789,"~/Google Drive/000Albright Dissertation Progress/Dis
 round10 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 10/NHATS_R10_Final_Release_SAS/NHATS_Round_10_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
-         ,r10d2intvrage #age group at interview. Note, actual age and birth year not given in NHATS.
-         # Age groupings:  1 - 65-69
-         #                 2 - 70-74
-         #                 3 - 75-79
-         #                 4 - 80-84
-         #                 5 - 85-89
-         #                 6 - 90 +
 #         ,wa10dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
 #         ,gr10dgripadm   #if =1 Include if respondent was eligible for grip strength test, it was administered, and a score was recorded 
           ,hw10currweigh #current weight in pounds
@@ -2819,9 +2752,7 @@ round10 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS 
   mutate(
     count=1,
     round='2020',
-    #prepare time-varying demogs for each round
-    age_grp=r10d2intvrage,
-    
+
     #This next section preps variables needed for one or more of the 5 frailty metrics  
     hw10howtallin = replace_na(hw10howtallin, 0), #this replace the 20 people with a height in feet but no inches to inches=0, so 4'(3), 5'(17)
     height2020=hw10howtallft*12+hw10howtallin, #height is needed to calculate BMI and for walking test 
@@ -3037,7 +2968,7 @@ round10 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS 
   )# %>% filter (pfp2013>=0) (return to filtering later)
 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
-vars = c('spid','count', 'round', 'age_grp', 'falls2020', 'competence_3_2020', 'frailty_3_2020', 'pfp_3_2020', 'press2020', 'accburden2020','recentstructmod2020', 'hc10worryfall')
+vars = c('spid','count', 'round', 'falls2020', 'competence_3_2020', 'frailty_3_2020', 'pfp_3_2020', 'press2020', 'accburden2020','recentstructmod2020', 'hc10worryfall')
 r10<-round10[vars]
 write.csv (r10,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r10.csv")
 
@@ -3053,7 +2984,6 @@ r10same<-r10 %>% rename(
   select(spid
          ,count
          ,round
-         ,age_grp
          ,falls
          ,pfp_3_
          ,competence_3_
