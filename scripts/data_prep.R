@@ -82,7 +82,7 @@ filter (spid %in% c('10000516',
 round1 <- 
   merge (read_sas("~/Documents/NHATS/NHATS Sensitive Data/Sensitive Round 1/NHATS_Round_1_SP_Sen_Dem_Files_SAS/NHATS_Round_1_SP_Sen_Dem_File.sas7bdat", NULL) %>% 
   select(spid,r1dbirthyr) %>% mutate(birthyr=r1dbirthyr),
-(read_sas("source_data/round1/NHATS_Round_1_SP_File.sas7bdat", NULL)) %>% 
+(read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 1/NHATS_R1_Final_Release_SAS_V3/NHATS_Round_1_SP_File.sas7bdat", NULL)) %>% 
     select(spid 
 #Do Health, Dementia, in-home care, and wealth altogether for each round to make process more efficient. 
            ,hc1health #overall health
@@ -380,7 +380,7 @@ vars = c('spid', 'female', 'count', 'round', 'birthyr','whitenothisp', 'blacknot
 r1<-round1[vars]
 write.csv (r1,"clean_data/forheatmap.csv")
 a<-tabled(r1$frailty2011, r1$press2011, r1$falls2011)
-View (a)
+#View (a)
 write.csv (a,"output/rawfrailtytable.csv")
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -463,7 +463,7 @@ r1same<-r1 %>% rename(
 #1st, join gender to the full dataset fot round 2, then make restricted data. 
 #preround2<-merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 2/NHATS_R2_Final_Release_SAS_V3/NHATS_Round_2_SP_File_v2.sas7bdat", NULL))
   
-round2 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 2/NHATS_R2_Final_Release_SAS_V3/NHATS_Round_2_SP_File_v2.sas7bdat", NULL)) %>%  
+round2 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 2/NHATS_R2_Final_Release_SAS_V3/NHATS_Round_2_SP_File_v2.sas7bdat", NULL)) %>%  
 #  read_sas("Documents/NHATS/NHATS Public Data/Public Round 2/NHATS_R2_Final_Release_SAS_V3/NHATS_Round_2_SP_File_v2.sas7bdat", NULL) %>% 
   select(spid
          ,female
@@ -717,7 +717,7 @@ round2 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid', 'count', 'round', 'falls2012', 'competence2012', 'frailty2012', 'pfp2012', 'press2012', 'accburden2012','recentstructmod2012')
 r2<-round2[vars]
-write.csv (r2,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r2.csv")
+#write.csv (r2,"clean_data/r2.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -740,12 +740,12 @@ r2same<-r2 %>% rename(
 
 #First stack repeat measures with round name but without demographics. 
 rounds12<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same))
-write.csv (rounds12,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12.csv")
+#write.csv (rounds12,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12.csv")
 
 #################################################################################
 ####################ROUND 3######################################################
 #################################################################################
-round3 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 3/NHATS_R3_Final_Release_SAS_V2/NHATS_Round_3_SP_File.sas7bdat", NULL)) %>%  
+round3 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 3/NHATS_R3_Final_Release_SAS_V2/NHATS_Round_3_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa3dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -999,7 +999,7 @@ round3 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2013', 'competence2013', 'frailty2013', 'pfp2013', 'press2013', 'accburden2013','recentstructmod2013', 'hc3worryfall')
 r3<-round3[vars]
-write.csv (r3,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r3.csv")
+#write.csv (r3,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r3.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -1022,12 +1022,12 @@ r3same<-r3 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds123<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same))
-write.csv (rounds123,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds123.csv")
+#write.csv (rounds123,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds123.csv")
 
 #################################################################################
 ####################ROUND 4######################################################
 #################################################################################
-round4 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 4/NHATS_R4_Final_Release_SAS_V2/NHATS_Round_4_SP_File.sas7bdat", NULL)) %>%  
+round4 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 4/NHATS_R4_Final_Release_SAS_V2/NHATS_Round_4_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa4dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -1275,7 +1275,7 @@ round4 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2014', 'competence2014', 'frailty2014', 'pfp2014', 'press2014', 'accburden2014','recentstructmod2014', 'hc4worryfall')
 r4<-round4[vars]
-write.csv (r4,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r4.csv")
+#write.csv (r4,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r4.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -1298,13 +1298,13 @@ r4same<-r4 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds1234<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same))
-write.csv (rounds1234,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds1234.csv")
+#write.csv (rounds1234,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds1234.csv")
 
 
 #################################################################################
 ####################ROUND 5######################################################
 #################################################################################
-round5 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 5/NHATS_R5_Final_Release_SAS_V3/NHATS_Round_5_SP_File_v2.sas7bdat", NULL)) %>%  
+round5 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 5/NHATS_R5_Final_Release_SAS_V3/NHATS_Round_5_SP_File_v2.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa5dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -1552,7 +1552,7 @@ round5 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2015', 'competence2015', 'frailty2015', 'pfp2015', 'press2015', 'accburden2015','recentstructmod2015', 'hc5worryfall')
 r5<-round5[vars]
-write.csv (r5,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r5.csv")
+#write.csv (r5,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r5.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -1575,12 +1575,12 @@ r5same<-r5 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds12345<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same, r5same))
-write.csv (rounds12345,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12345.csv")
+#write.csv (rounds12345,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12345.csv")
 
 #################################################################################
 ####################ROUND 6######################################################
 #################################################################################
-round6 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 6/NHATS_R6_Final_Release_SAS_V3/NHATS_Round_6_SP_File_V2.sas7bdat", NULL)) %>%  
+round6 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 6/NHATS_R6_Final_Release_SAS_V3/NHATS_Round_6_SP_File_V2.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa6dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -1832,7 +1832,7 @@ round6 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2016', 'competence2016', 'frailty2016', 'pfp2016', 'press2016', 'accburden2016','recentstructmod2016', 'hc6worryfall')
 r6<-round6[vars]
-write.csv (r6,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r6.csv")
+#write.csv (r6,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r6.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -1855,12 +1855,12 @@ r6same<-r6 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds123456<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same, r5same, r6same))
-write.csv (rounds123456,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds123456.csv")
+#write.csv (rounds123456,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds123456.csv")
 
 #################################################################################
 ####################ROUND 7######################################################
 #################################################################################
-round7 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 7/NHATS_R7_Final_Release_SAS_V2/NHATS_Round_7_SP_File.sas7bdat", NULL)) %>%  
+round7 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 7/NHATS_R7_Final_Release_SAS_V2/NHATS_Round_7_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa7dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -2112,7 +2112,7 @@ round7 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2017', 'competence2017', 'frailty2017', 'pfp2017', 'press2017', 'accburden2017','recentstructmod2017', 'hc7worryfall')
 r7<-round7[vars]
-write.csv (r7,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r7.csv")
+#write.csv (r7,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r7.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -2135,12 +2135,12 @@ r7same<-r7 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds1234567<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same, r5same, r6same, r7same))
-write.csv (rounds1234567,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds1234567.csv")
+#write.csv (rounds1234567,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds1234567.csv")
 
 #################################################################################
 ####################ROUND 8######################################################
 #################################################################################
-round8 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 8/NHATS_R8_Final_Release_SAS_V2/NHATS_Round_8_SP_File.sas7bdat", NULL)) %>%  
+round8 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 8/NHATS_R8_Final_Release_SAS_V2/NHATS_Round_8_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa8dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -2392,7 +2392,7 @@ round8 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2018', 'competence2018', 'frailty2018', 'pfp2018', 'press2018', 'accburden2018','recentstructmod2018', 'hc8worryfall')
 r8<-round8[vars]
-write.csv (r8,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r8.csv")
+#write.csv (r8,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r8.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -2415,13 +2415,13 @@ r8same<-r8 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds12345678<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same, r5same, r6same, r7same, r8same))
-write.csv (rounds12345678,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12345678.csv")
+#write.csv (rounds12345678,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12345678.csv")
 
 
 #################################################################################
 ####################ROUND 9######################################################
 #################################################################################
-round9 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 9/NHATS_R9_Final_Release_SAS/NHATS_Round_9_SP_File.sas7bdat", NULL)) %>%  
+round9 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 9/NHATS_R9_Final_Release_SAS/NHATS_Round_9_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
          ,wa9dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -2673,7 +2673,7 @@ round9 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS P
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2019', 'competence2019', 'frailty2019', 'pfp2019', 'press2019', 'accburden2019','recentstructmod2019', 'hc9worryfall')
 r9<-round9[vars]
-write.csv (r9,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r9.csv")
+#write.csv (r9,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r9.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -2696,12 +2696,12 @@ r9same<-r9 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds123456789<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same, r5same, r6same, r7same, r8same, r9same))
-write.csv (rounds123456789,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds123456789.csv")
+#write.csv (rounds123456789,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds123456789.csv")
 
 #################################################################################
 ####################ROUND 10######################################################
 #################################################################################
-round10 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS Public Data/Public Round 10/NHATS_R10_Final_Release_SAS/NHATS_Round_10_SP_File.sas7bdat", NULL)) %>%  
+round10 <- merge ((r1 %>% select(spid, female)),read_sas("~/Documents/NHATS/NHATS Public Data/Public Round 10/NHATS_R10_Final_Release_SAS/NHATS_Round_10_SP_File.sas7bdat", NULL)) %>%  
   select(spid
          ,female
 #         ,wa10dwlkadm   #if =1 Include if respondent was eligible for walk test, it was administered, and a score was recorded 
@@ -2970,7 +2970,7 @@ round10 <- merge ((r1 %>% select(spid, female)),read_sas("Documents/NHATS/NHATS 
 #Create tidy dataset for Tableau heat map, of falls plotted over frailty and acc
 vars = c('spid','count', 'round', 'falls2020', 'competence_3_2020', 'frailty_3_2020', 'pfp_3_2020', 'press2020', 'accburden2020','recentstructmod2020', 'hc10worryfall')
 r10<-round10[vars]
-write.csv (r10,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r10.csv")
+#write.csv (r10,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/r10.csv")
 
 
 #Create file for binding rows, so all vars have same names and can be additive to long format file for analysis.
@@ -2993,4 +2993,4 @@ r10same<-r10 %>% rename(
 
 #Stack repeat measures with round name and then add on demographics. 
 rounds12345678910<-merge ((r1 %>% select(spid, female, whitenothisp, blacknothisp, hispanic, otherrace)),bind_rows(r1same, r2same, r3same, r4same, r5same, r6same, r7same, r8same, r9same, r10same))
-write.csv (rounds12345678910,"~/Google Drive/000Albright Dissertation Progress/Dissertation Analytic Work/rounds12345678910.csv")
+write.csv (rounds12345678910,"clean_data/allcleanrounds.csv")
